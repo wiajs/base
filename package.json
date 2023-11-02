@@ -1,0 +1,46 @@
+{
+  "name": "@wiajs/base",
+  "version": "1.1.0",
+  "description": "wia app base lib, included by index.html",
+  "main": "./dist/base.cmn.js",
+	"module": "./dist/index.esm.js",
+  "types": "./dist/base.d.ts",
+  "scripts": {
+    "build": "cross-env NODE_ENV=production gulp build",
+    "dev": "cross-env NODE_ENV=development gulp build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wiajs/wia.git"
+  },
+  "keywords": [
+    "wia",
+    "base"
+  ],
+  "author": {
+    "name": "Sibyl Yu",
+    "email": "sibyl@wia.pub"
+  },
+  "license": "ELv2",
+  "bugs": {
+    "url": "https://github.com/wiajs/base/issues"
+  },
+  "homepage": "https://www.wia.pub/base",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-commonjs": "^25.0.1",
+    "@rollup/plugin-node-resolve": "^15.1.0",
+    "@rollup/plugin-replace": "^5.0.2",
+    "@rollup/plugin-terser": "^0.4.3",
+    "cross-env": "^7.0.3",
+    "debug": "^4.3.4",
+    "fs-extra": "^11.1.1",
+    "gulp": "^4.0.2",
+    "rollup": "^3.25.1",
+    "terser": "^5.18.0"
+  },
+  "dependencies": {}
+}
