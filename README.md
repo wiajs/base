@@ -1,3 +1,5 @@
+English | [Chinese](./README.CN.md)
+
 # base
 
 ## wia's base module
@@ -66,3 +68,9 @@ The resulting files are:
 5. dist/base.js
 6. dist/base.js.map
 7. dist/base.min.js
+
+## License
+
+[ELv2](https://www.elastic.co/cn/licensing/elastic-license)
+
+Copyright (c) 2020-present Sibyl Yu

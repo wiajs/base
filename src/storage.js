@@ -6,9 +6,9 @@
  * 离线存储，缺省 30 天
  * @param {*} key
  * @param {*} val
- * @param {*} exp 过期时长，单位分钟，30天 x 24小时 x 60分 = 43200分
+ * @param {*} exp 过期时长，单位分钟，180天 x 24小时 x 60分 = 259200分
  */
-function set(store, key, val, exp = 43200) {
+function set(store, key, val, exp = 259200) {
   const v = {
     exp,
     time: Math.trunc(Date.now() / 1000), // 记录何时将值存入缓存，秒级
@@ -18,6 +18,7 @@ function set(store, key, val, exp = 43200) {
   if (!key) return;
 
   store.setItem(key, JSON.stringify(v));
+  // console.log({key, v}, 'set');
 }
 
 function get(store, key) {
@@ -26,6 +27,7 @@ function get(store, key) {
   if (!key) return '';
 
   let v = store.getItem(key);
+  // console.log({key, v}, 'get');
 
   try {
     v = JSON.parse(v);
@@ -33,9 +35,10 @@ function get(store, key) {
       const time = Math.trunc(Date.now() / 1000); // 秒
       if (v.time && v.exp) {
         const dur = time - v.time;
-        if (dur > v.exp * 60) {
+        const exp = v.exp * 60;
+        if (dur > exp) {
           store.removeItem(key);
-          console.info(`store.get(${key}) dur:${dur} > exp:${v.exp * 60}`);
+          console.info(`store.remove(${key}) time:${v.time} dur:${dur} > exp:${exp}`);
         } else if (v.val) R = v.val;
       } else if (v.val) {
         console.error(`store.get(${key}) no time and exp`);

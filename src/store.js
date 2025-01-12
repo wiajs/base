@@ -6,13 +6,13 @@ import * as st from './storage';
 const lst = localStorage;
 
 /**
- * 离线存储，缺省 30 天
+ * 离线存储，缺省 180 天
  * @param {*} key
  * @param {*} val
- * @param {*} exp 过期时长，单位分钟，30天 x 24小时 x 60分 = 43200分
+ * @param {*} exp 过期时长，单位分钟，180天 x 24小时 x 60分 = 259200分
  */
 function set(key, val, exp) {
-  exp = exp || 43200;
+  exp = exp || 259200;
   st.set(lst, key, val);
 }
 

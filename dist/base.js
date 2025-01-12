@@ -1,6 +1,6 @@
 /*!
-  * wia base v1.0.1
-  * (c) 2022-2023 Sibyl Yu and contributors
+  * wia base v1.2.2
+  * (c) 2022-2024 Sibyl Yu and contributors
   * Released under the MIT License.
 */
 (function (global, factory) {
@@ -75,10 +75,12 @@
       if (len && name) {
         doms.forEach(function (el) {
           var ns = $$1.qus('[name]', el);
-          ns && ns.length && ns.forEach(function (n) {
+          (ns == null ? void 0 : ns.length) && ns.forEach(function (n) {
             var $n = $$1(n);
             var nm = $n.attr('name');
-            if (!_this[nm] || _this[nm].dom !== n) _this[nm] = $n;
+            if (!_this.n) _this.n = {};
+            if (!_this.n[nm] || _this.n[nm].dom !== n) _this.n[nm] = $n;
+            if (!_this[nm] || D.isD(_this[nm]) && _this[nm].dom !== n) _this[nm] = $n;
           });
         });
       }
@@ -88,9 +90,22 @@
     };
     var _proto = D.prototype;
     _proto.hasClass = function hasClass(name) {
-      return emptyArray.some.call(this, function (el) {
-        return el.classList.contains(name);
-      });
+      var R = false;
+      try {
+        if (name) {
+          R = emptyArray.some.call(this, function (el) {
+            var _el$classList;
+            if (!name.includes(' ')) return el == null || (_el$classList = el.classList) == null ? void 0 : _el$classList.contains(name);else {
+              var nms = name.split(' ');
+              return nms.every(function (nm) {
+                var _el$classList2;
+                return el == null || (_el$classList2 = el.classList) == null ? void 0 : _el$classList2.contains(nm.trim());
+              });
+            }
+          });
+        }
+      } catch (e) {}
+      return R;
     };
     _proto.addClass = function addClass(className, only) {
       if (typeof className === 'undefined') {
@@ -241,10 +256,25 @@
   $$1.isWindow = function (o) {
     return o != null && o == o.window;
   };
-  $$1.isObject = function (o) {
-    return $$1.type(o) === 'object';
+  $$1.isObject = function (v) {
+    return $$1.type(v) === 'object';
+  };
+  $$1.isMap = function (v) {
+    return $$1.type(v) === 'Map';
+  };
+  $$1.isSet = function (v) {
+    return $$1.type(v) === 'Set';
+  };
+  $$1.isRegExp = function (v) {
+    return $$1.type(v) === 'RegExp';
+  };
+  $$1.isSymbol = function (v) {
+    return $$1.type(v) === 'symbol';
   };
   $$1.isObj = $$1.isObject;
+  $$1.isPromise = function (val) {
+    return ($$1.isObject(val) || $$1.isFunction(val)) && $$1.isFunction(val.then) && $$1.isFunction(val["catch"]);
+  };
   $$1.isValue = function (o) {
     return $$1.type(o) === 'string' || $$1.type(o) === 'number' || $$1.type(o) === 'boolean';
   };
@@ -273,10 +303,10 @@
     return v == null;
   };
   $$1.isBool = function (v) {
-    return $$1.type(o) === 'boolean';
+    return $$1.type(v) === 'boolean';
   };
-  $$1.hasVal = function (o) {
-    return !$$1.isEmpty(o);
+  $$1.hasVal = function (v) {
+    return !$$1.isEmpty(v);
   };
   $$1.isArray = Array.isArray || function (object) {
     return object instanceof Array;
@@ -289,15 +319,15 @@
   };
   $$1.isNumber = $$1.isNumeric;
   $$1.isNum = $$1.isNumeric;
-  $$1.isString = function (o) {
-    return $$1.type(o) === 'string';
+  $$1.isString = function (v) {
+    return $$1.type(v) === 'string';
   };
   $$1.isStr = $$1.isString;
   $$1.isDom = function (v) {
     return D.isD(v);
   };
   $$1.isDate = function (v) {
-    return $$1.type(o) === 'date';
+    return $$1.type(v) === 'date';
   };
   $$1.isDateStr = function (v) {
     return Date.parse(v) > 0;
@@ -460,7 +490,7 @@
     }
   }
   $$1.assign = function (to) {
-    if (!to) return {};
+    if (to === undefined || to === null) return {};
     var deep;
     for (var _len = arguments.length, srcs = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
       srcs[_key - 1] = arguments[_key];
@@ -488,7 +518,7 @@
   };
   $$1.fastLink = function (ctx) {
     try {
-      var links = $$1.qus('a.fastLink, a.fastlink', ctx);
+      var links = $$1.qus('a[fastLink][fastlink][back]', ctx);
       links.forEach(function (link) {
         if ($$1.support.touch) {
           var startX;
@@ -499,11 +529,11 @@
           };
           link.ontouchend = function (ev) {
             if (Math.abs(ev.changedTouches[0].clientX - startX) <= 5 && Math.abs(ev.changedTouches[0].clientY - startY) <= 5) {
-              if (link.hasAttribute('back') || link.hasClass('back')) return window.history.back();
+              if (link.hasAttribute('back')) return window.history.back();
               if (link.href) window.location.href = link.href;
             }
           };
-        } else if (link.hasAttribute('back') || link.hasClass('back')) {
+        } else if (link.hasAttribute('back')) {
           link.onclick = function (ev) {
             return window.history.back();
           };
@@ -750,7 +780,7 @@
 
   function set$2(store, key, val, exp) {
     if (exp === void 0) {
-      exp = 43200;
+      exp = 259200;
     }
     var v = {
       exp: exp,
@@ -770,9 +800,10 @@
         var time = Math.trunc(Date.now() / 1000);
         if (v.time && v.exp) {
           var dur = time - v.time;
-          if (dur > v.exp * 60) {
+          var exp = v.exp * 60;
+          if (dur > exp) {
             store.removeItem(key);
-            console.info("store.get(" + key + ") dur:" + dur + " > exp:" + v.exp * 60);
+            console.info("store.remove(" + key + ") time:" + v.time + " dur:" + dur + " > exp:" + exp);
           } else if (v.val) R = v.val;
         } else if (v.val) {
           console.error("store.get(" + key + ") no time and exp");

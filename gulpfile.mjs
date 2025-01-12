@@ -15,7 +15,7 @@ if (!fs.existsSync(out)) {
 }
 
 /**
- * É¾³ýÒÑÓÐ·¢²¼ÎÄ¼þ£¬È«²¿ÖØÐÂÉú³É
+ * åˆ é™¤å·²æœ‰å‘å¸ƒæ–‡ä»¶ï¼Œå…¨éƒ¨é‡æ–°ç”Ÿæˆ
  * @returns
  */
 async function clean(cb) {
@@ -26,15 +26,45 @@ async function clean(cb) {
 }
 
 /**
- * Í¬Ê±Éú³Éumd¡¢cjs¡¢esm ÈýÖÖ¸ñÊ½Êä³öÎÄ¼þ
+ * åŒæ—¶ç”Ÿæˆumdã€cjsã€es ä¸‰ç§æ ¼å¼è¾“å‡ºæ–‡ä»¶
  */
 const buildAll = gulp.series(clean, cb => {
   console.log('start build ...');
   build(configs, cb);
 });
 
+/**
+ * ä»…ç”Ÿæˆcjs æ ¼å¼
+ */
+gulp.task('cjs', cb => {
+  console.log('dev cjs...');
+  // filter configs
+  const cfg = configs.filter(c => c.output.format === 'cjs');
+  build(cfg, cb);
+});
+
+/**
+ * ä»…ç”Ÿæˆ es æ ¼å¼
+ */
+gulp.task('esm', cb => {
+  console.log('dev esm...');
+  // filter configs
+  const cfg = configs.filter(c => c.output.format === 'esm');
+  build(cfg, cb);
+});
+
+/**
+ * ä»…ç”Ÿæˆ umd æ ¼å¼
+ */
+gulp.task('umd', cb => {
+  console.log('dev umd...');
+  // filter configs
+  const cfg = configs.filter(c => c.output.format === 'umd');
+  build(cfg, cb);
+});
+
 gulp.task('watch', () => {
-  gulp.watch(`${src}/*.js`, gulp.series(['build']));
+  gulp.watch(`${src}/*.js`, gulp.series([buildAll]));
 });
 
 module.default = buildAll;

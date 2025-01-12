@@ -15,8 +15,7 @@ var emptyArray = [],
   toString = class2type.toString,
   singleTagRE = /^<(\w+)\s*\/?>(?:<\/\1>|)$/,
   simpleSelectorRE = /^[\w-]*$/,
-  tagExpanderRE =
-    /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/gi,
+  tagExpanderRE = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/gi,
   rootNodeRE = /^(?:body|html)$/i,
   capitalRE = /([A-Z])/g,
   fragmentRE = /^\s*<(\w+|!)[^>]*>/,
@@ -64,12 +63,13 @@ class D {
     if (len && name) {
       doms.forEach(el => {
         const ns = $.qus('[name]', el);
-        ns &&
-          ns.length &&
+        ns?.length &&
           ns.forEach(n => {
             const $n = $(n);
             const nm = $n.attr('name');
-            if (!this[nm] || this[nm].dom !== n) this[nm] = $n;
+            if (!this.n) this.n = {};
+            if (!this.n[nm] || this.n[nm].dom !== n) this.n[nm] = $n;
+            if (!this[nm] || (D.isD(this[nm]) && this[nm].dom !== n)) this[nm] = $n;
           });
       });
     }
@@ -79,10 +79,23 @@ class D {
     return d instanceof D;
   }
 
+  // 包含类名，支持多个类名，空格隔开！！！
   hasClass(name) {
-    return emptyArray.some.call(this, function (el) {
-      return el.classList.contains(name);
-    });
+    let R = false;
+    try {
+      if (name) {
+        R = emptyArray.some.call(this, function (el) {
+          if (!name.includes(' '))
+            return el?.classList?.contains(name);
+          else {
+            const nms = name.split(' ');
+            return nms.every(nm => el?.classList?.contains(nm.trim()))
+          }
+        });
+      }
+    } catch(e) {}
+    
+    return R;
   }
 
   /**
@@ -116,10 +129,7 @@ class D {
     const classes = className.split(' ');
     for (let i = 0; i < classes.length; i += 1) {
       for (let j = 0; j < this.length; j += 1) {
-        if (
-          typeof this[j] !== 'undefined' &&
-          typeof this[j].classList !== 'undefined'
-        )
+        if (typeof this[j] !== 'undefined' && typeof this[j].classList !== 'undefined')
           this[j].classList.remove(classes[i]);
       }
     }
@@ -129,13 +139,9 @@ class D {
   clearClass() {
     let n;
     for (let i = 0; i < this.length; i += 1) {
-      if (
-        typeof this[i] !== 'undefined' &&
-        typeof this[i].classList !== 'undefined'
-      ) {
+      if (typeof this[i] !== 'undefined' && typeof this[i].classList !== 'undefined') {
         n = this[i];
-        for (let j = 0; j < n.classList.length; j++)
-          n.classList.remove(n.classList.item(j));
+        for (let j = 0; j < n.classList.length; j++) n.classList.remove(n.classList.item(j));
       }
     }
     return this;
@@ -144,10 +150,7 @@ class D {
   replaceClass(src, dst) {
     let n;
     for (let i = 0; i < this.length; i += 1) {
-      if (
-        typeof this[i] !== 'undefined' &&
-        typeof this[i].classList !== 'undefined'
-      ) {
+      if (typeof this[i] !== 'undefined' && typeof this[i].classList !== 'undefined') {
         n = this[i];
         if (n.contains(src)) n.classList.replace(src, dst);
         else n.classList.add(dst);
@@ -165,15 +168,9 @@ class D {
     const classes = className.split(' ');
     for (let i = 0; i < classes.length; i += 1) {
       for (let j = 0; j < this.length; j += 1) {
-        if (
-          typeof this[j] !== 'undefined' &&
-          typeof this[j].classList !== 'undefined'
-        ) {
+        if (typeof this[j] !== 'undefined' && typeof this[j].classList !== 'undefined') {
           if (arguments.length === 1) this[j].classList.toggle(classes[i]);
-          else
-            add
-              ? this[j].classList.add(classes[i])
-              : this[j].classList.remove(classes[i]);
+          else add ? this[j].classList.add(classes[i]) : this[j].classList.remove(classes[i]);
         }
       }
     }
@@ -242,16 +239,7 @@ function fragment(html, name, properties) {
   if ($.isPlainObject(properties)) {
     const nodes = $(R);
     // special attributes that should be get/set via method calls
-    const methodAttributes = [
-      'val',
-      'css',
-      'html',
-      'text',
-      'data',
-      'width',
-      'height',
-      'offset',
-    ];
+    const methodAttributes = ['val', 'css', 'html', 'text', 'data', 'width', 'height', 'offset'];
 
     $.each(properties, (key, value) => {
       if (methodAttributes.indexOf(key) > -1) nodes[key](value);
@@ -267,7 +255,7 @@ function fragment(html, name, properties) {
  * @param {*} sel selector 选择器，支持点击事件对象自动转换为target
  * @param {*} ctx context or name
  * true：为 name
- * @param {*} name 加载有名dom
+ * @param {boolean=} name 加载有名dom，默认为 false
  * @returns Dom实例，D instance
  */
 function $(sel, ctx, name) {
@@ -308,8 +296,7 @@ function $(sel, ctx, name) {
       // Wrap DOM nodes.
       //else if ($.isObject(sel))
       // If it's a html fragment, create nodes from it
-      else if (fragmentRE.test(sel))
-        (R = fragment(sel, RegExp.$1, ctx)), (sel = null);
+      else if (fragmentRE.test(sel)) (R = fragment(sel, RegExp.$1, ctx)), (sel = null);
       else if (ctx) return $(ctx).find(sel);
       else R = $.qsa(sel);
     }
@@ -343,16 +330,18 @@ $.isWindow = function (o) {
   return o != null && o == o.window;
 };
 // 纯对象变量，不包含函数、Date、正则、数组等对象
-$.isObject = function (o) {
-  return $.type(o) === 'object';
-};
+$.isObject = v => $.type(v) === 'object';
+$.isMap = v => $.type(v) === 'Map';
+$.isSet = v => $.type(v) === 'Set';
+$.isRegExp = v => $.type(v) === 'RegExp';
+$.isSymbol = v => $.type(v) === 'symbol';
 $.isObj = $.isObject;
+$.isPromise = val =>
+  ($.isObject(val) || $.isFunction(val)) && $.isFunction(val.then) && $.isFunction(val.catch);
 
 // 值变量
 $.isValue = function (o) {
-  return (
-    $.type(o) === 'string' || $.type(o) === 'number' || $.type(o) === 'boolean'
-  );
+  return $.type(o) === 'string' || $.type(o) === 'number' || $.type(o) === 'boolean';
 };
 $.isVal = $.isValue;
 
@@ -369,11 +358,7 @@ $.isDocument = function (o) {
 $.isDoc = $.isDocument;
 
 $.isPlainObject = function (o) {
-  return (
-    $.isObject(o) &&
-    !$.isWindow(o) &&
-    Object.getPrototypeOf(o) == Object.prototype
-  );
+  return $.isObject(o) && !$.isWindow(o) && Object.getPrototypeOf(o) == Object.prototype;
 };
 $.isPlain = $.isPlainObject;
 
@@ -398,11 +383,11 @@ $.isNull = function (v) {
 };
 
 $.isBool = function (v) {
-  return $.type(o) === 'boolean';
+  return $.type(v) === 'boolean';
 };
 
-$.hasVal = function (o) {
-  return !$.isEmpty(o);
+$.hasVal = function (v) {
+  return !$.isEmpty(v);
 };
 $.isArray =
   Array.isArray ||
@@ -415,26 +400,15 @@ $.inArray = function (elem, array, i) {
 
 // jQuery new Date() 判断为 数字
 $.isNumeric = function (val) {
-  return (
-    typeof val === 'number' ||
-    ($.isObject(val) && getTag(val) == '[object Number]')
-  );
+  return typeof val === 'number' || ($.isObject(val) && getTag(val) == '[object Number]');
 };
 
 $.isNumber = $.isNumeric;
 $.isNum = $.isNumeric;
-$.isString = function (o) {
-  return $.type(o) === 'string';
-};
+$.isString = v => $.type(v) === 'string';
 $.isStr = $.isString;
-
-$.isDom = function (v) {
-  return D.isD(v);
-};
-
-$.isDate = function (v) {
-  return $.type(o) === 'date';
-};
+$.isDom = v => D.isD(v);
+$.isDate = v => $.type(v) === 'date';
 
 $.isDateStr = function (v) {
   return Date.parse(v) > 0;
@@ -528,8 +502,7 @@ $.map = function (els, cb) {
 $.each = function (els, cb) {
   var i, key;
   if (likeArray(els)) {
-    for (i = 0; i < els.length; i++)
-      if (cb.call(els[i], i, els[i]) === false) return els;
+    for (i = 0; i < els.length; i++) if (cb.call(els[i], i, els[i]) === false) return els;
   } else {
     for (key in els) if (cb.call(els[key], key, els[key]) === false) return els;
   }
@@ -540,8 +513,7 @@ $.each = function (els, cb) {
 $.forEach = function (els, cb) {
   var i, key;
   if (likeArray(els)) {
-    for (i = 0; i < els.length; i++)
-      if (cb.call(els[i], els[i], i) === false) return els;
+    for (i = 0; i < els.length; i++) if (cb.call(els[i], els[i], i) === false) return els;
   } else {
     for (key in els) if (cb.call(els[key], els[key], key) === false) return els;
   }
@@ -656,10 +628,7 @@ $.qns = function (name, ctx) {
 // 效率高于qus
 $.qcs = function (sel, ctx) {
   var R = null;
-  if (ctx)
-    R = D.isD(ctx)
-      ? ctx[0].getElementsByClassName(sel)
-      : ctx.getElementsByClassName(sel);
+  if (ctx) R = D.isD(ctx) ? ctx[0].getElementsByClassName(sel) : ctx.getElementsByClassName(sel);
   else R = document.getElementsByClassName(sel);
   if (R && R.length > 0) return slice.call(R);
   else return [];
@@ -669,10 +638,7 @@ $.qcs = function (sel, ctx) {
 // 效率高于qus
 $.qts = function (sel, ctx) {
   var R = null;
-  if (ctx)
-    R = D.isD(ctx)
-      ? ctx[0].getElementsByTagName(sel)
-      : ctx.getElementsByTagName(sel);
+  if (ctx) R = D.isD(ctx) ? ctx[0].getElementsByTagName(sel) : ctx.getElementsByTagName(sel);
   else R = document.getElementsByTagName(sel);
   if (R && R.length > 0) return slice.call(R);
   else return [];
@@ -710,7 +676,8 @@ function assign(to, src, deep) {
  * 第一个参数为 true，为深拷贝，
  */
 $.assign = function (to, ...srcs) {
-  if (!to) return {};
+  if (to === undefined || to === null) return {};
+
   let deep;
   if (typeof to === 'boolean') {
     deep = to;
@@ -721,7 +688,9 @@ $.assign = function (to, ...srcs) {
   });
   return to;
 };
+
 $.extend = $.assign;
+
 $.merge = function (...args) {
   const to = args[0];
   args.splice(0, 1);
@@ -730,10 +699,11 @@ $.merge = function (...args) {
   });
   return to;
 };
+
 $.fastLink = function (ctx) {
-  // a 标签加载 touchstart 事件,避免 300毫秒等待，带back class 或 attr，调用浏览器返回
+  // fastLink a 标签加载 touchstart 事件,避免 300毫秒等待，带back attr，调用浏览器返回
   try {
-    const links = $.qus('a.fastLink, a.fastlink', ctx);
+    const links = $.qus('a[fastLink][fastlink][back]', ctx);
     links.forEach(link => {
       if ($.support.touch) {
         let startX;
@@ -748,12 +718,11 @@ $.fastLink = function (ctx) {
             Math.abs(ev.changedTouches[0].clientY - startY) <= 5
           ) {
             // ev.preventDefault();
-            if (link.hasAttribute('back') || link.hasClass('back'))
-              return window.history.back();
+            if (link.hasAttribute('back')) return window.history.back();
             if (link.href) window.location.href = link.href;
           }
         };
-      } else if (link.hasAttribute('back') || link.hasClass('back')) {
+      } else if (link.hasAttribute('back')) {
         link.onclick = ev => {
           return window.history.back();
         };
@@ -763,18 +732,16 @@ $.fastLink = function (ctx) {
     alert(`fastLink exp: ${e.message}`);
   }
 };
+
 $.requestAnimationFrame = function (callback) {
-  if (window.requestAnimationFrame)
-    return window.requestAnimationFrame(callback);
-  else if (window.webkitRequestAnimationFrame)
-    return window.webkitRequestAnimationFrame(callback);
+  if (window.requestAnimationFrame) return window.requestAnimationFrame(callback);
+  else if (window.webkitRequestAnimationFrame) return window.webkitRequestAnimationFrame(callback);
   return window.setTimeout(callback, 1000 / 60);
 };
 
 $.cancelAnimationFrame = function (id) {
   if (window.cancelAnimationFrame) return window.cancelAnimationFrame(id);
-  else if (window.webkitCancelAnimationFrame)
-    return window.webkitCancelAnimationFrame(id);
+  else if (window.webkitCancelAnimationFrame) return window.webkitCancelAnimationFrame(id);
   return window.clearTimeout(id);
 };
 $.deleteProps = function (obj) {
@@ -953,8 +920,7 @@ $.urlParam = function (url) {
   let param;
   let length;
   if (typeof urlToParse === 'string' && urlToParse.length) {
-    urlToParse =
-      urlToParse.indexOf('?') > -1 ? urlToParse.replace(/\S*\?/, '') : '';
+    urlToParse = urlToParse.indexOf('?') > -1 ? urlToParse.replace(/\S*\?/, '') : '';
     params = urlToParse.split('&').filter(paramsPart => paramsPart !== '');
     length = params.length;
 
