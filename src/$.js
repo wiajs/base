@@ -5,7 +5,7 @@
  * 相关方法与用法与 zepto、jQuery兼容。
  */
 
-import support from './support';
+import support from './support'
 
 var emptyArray = [],
   class2type = {},
@@ -20,7 +20,7 @@ var emptyArray = [],
   capitalRE = /([A-Z])/g,
   fragmentRE = /^\s*<(\w+|!)[^>]*>/,
   uniqueNumber = 1,
-  tempParent = document.createElement('div');
+  tempParent = document.createElement('div')
 
 document.ready = function (cb) {
   // don't use "interactive" on IE <= 10 (it can fired premature)
@@ -29,18 +29,18 @@ document.ready = function (cb) {
     (document.readyState !== 'loading' && !document.documentElement.doScroll)
   )
     setTimeout(function () {
-      cb($);
-    }, 0);
+      cb($)
+    }, 0)
   else {
     var handler = function () {
-      document.removeEventListener('DOMContentLoaded', handler, false);
-      window.removeEventListener('load', handler, false);
-      cb($);
-    };
-    document.addEventListener('DOMContentLoaded', handler, false);
-    window.addEventListener('load', handler, false);
+      document.removeEventListener('DOMContentLoaded', handler, false)
+      window.removeEventListener('load', handler, false)
+      cb($)
+    }
+    document.addEventListener('DOMContentLoaded', handler, false)
+    window.addEventListener('load', handler, false)
   }
-};
+}
 
 /**
  * Return collection with methods
@@ -53,49 +53,48 @@ class D {
    * @param {*} name 将dom节点内有名节点加载到Dom对象实例，方便按名称直接调用
    */
   constructor(doms, sel, name) {
-    const len = doms ? doms.length : 0;
-    for (let i = 0; i < len; i++) this[i] = doms[i];
+    const len = doms ? doms.length : 0
+    for (let i = 0; i < len; i++) this[i] = doms[i]
 
-    this.dom = doms ? doms[0] : null;
-    this.length = len;
-    this.selector = sel || '';
+    this.dom = doms ? doms[0] : null
+    this.length = len
+    this.selector = sel || ''
     // 加载有name的dom节点到对象，方便按名称直接调用
     if (len && name) {
       doms.forEach(el => {
-        const ns = $.qus('[name]', el);
+        const ns = $.qus('[name]', el)
         ns?.length &&
           ns.forEach(n => {
-            const $n = $(n);
-            const nm = $n.attr('name');
-            if (!this.n) this.n = {};
-            if (!this.n[nm] || this.n[nm].dom !== n) this.n[nm] = $n;
-            if (!this[nm] || (D.isD(this[nm]) && this[nm].dom !== n)) this[nm] = $n;
-          });
-      });
+            const $n = $(n)
+            const nm = $n.attr('name')
+            if (!this.n) this.n = {}
+            if (!this.n[nm] || this.n[nm].dom !== n) this.n[nm] = $n
+            if (!this[nm] || (D.isD(this[nm]) && this[nm].dom !== n)) this[nm] = $n
+          })
+      })
     }
   }
 
   static isD(d) {
-    return d instanceof D;
+    return d instanceof D
   }
 
   // 包含类名，支持多个类名，空格隔开！！！
   hasClass(name) {
-    let R = false;
+    let R = false
     try {
       if (name) {
         R = emptyArray.some.call(this, function (el) {
-          if (!name.includes(' '))
-            return el?.classList?.contains(name);
+          if (!name.includes(' ')) return el?.classList?.contains(name)
           else {
-            const nms = name.split(' ');
+            const nms = name.split(' ')
             return nms.every(nm => el?.classList?.contains(nm.trim()))
           }
-        });
+        })
       }
-    } catch(e) {}
-    
-    return R;
+    } catch (e) {}
+
+    return R
   }
 
   /**
@@ -105,58 +104,58 @@ class D {
    */
   addClass(className, only) {
     if (typeof className === 'undefined') {
-      return this;
+      return this
     }
-    const classes = className.split(' ');
+    const classes = className.split(' ')
     for (let i = 0; i < classes.length; i += 1) {
       for (let j = 0; j < this.length; j += 1) {
-        const n = this[j];
+        const n = this[j]
         if (typeof n !== 'undefined' && typeof n.classList !== 'undefined') {
-          if (arguments.length === 1) n.classList.add(classes[i]);
+          if (arguments.length === 1) n.classList.add(classes[i])
           else if (only) {
             // clear all
-            $('.' + classes[i], n.parentNode).removeClass(classes[i]);
+            $('.' + classes[i], n.parentNode).removeClass(classes[i])
             // add one
-            n.classList.add(classes[i]);
+            n.classList.add(classes[i])
           }
         }
       }
     }
-    return this;
+    return this
   }
 
   removeClass(className) {
-    const classes = className.split(' ');
+    const classes = className.split(' ')
     for (let i = 0; i < classes.length; i += 1) {
       for (let j = 0; j < this.length; j += 1) {
         if (typeof this[j] !== 'undefined' && typeof this[j].classList !== 'undefined')
-          this[j].classList.remove(classes[i]);
+          this[j].classList.remove(classes[i])
       }
     }
-    return this;
+    return this
   }
 
   clearClass() {
-    let n;
+    let n
     for (let i = 0; i < this.length; i += 1) {
       if (typeof this[i] !== 'undefined' && typeof this[i].classList !== 'undefined') {
-        n = this[i];
-        for (let j = 0; j < n.classList.length; j++) n.classList.remove(n.classList.item(j));
+        n = this[i]
+        for (let j = 0; j < n.classList.length; j++) n.classList.remove(n.classList.item(j))
       }
     }
-    return this;
+    return this
   }
 
   replaceClass(src, dst) {
-    let n;
+    let n
     for (let i = 0; i < this.length; i += 1) {
       if (typeof this[i] !== 'undefined' && typeof this[i].classList !== 'undefined') {
-        n = this[i];
-        if (n.contains(src)) n.classList.replace(src, dst);
-        else n.classList.add(dst);
+        n = this[i]
+        if (n.contains(src)) n.classList.replace(src, dst)
+        else n.classList.add(dst)
       }
     }
-    return this;
+    return this
   }
 
   /**
@@ -165,22 +164,22 @@ class D {
    * @param {boolean} add - add or remove.
    */
   toggleClass(className, add) {
-    const classes = className.split(' ');
+    const classes = className.split(' ')
     for (let i = 0; i < classes.length; i += 1) {
       for (let j = 0; j < this.length; j += 1) {
         if (typeof this[j] !== 'undefined' && typeof this[j].classList !== 'undefined') {
-          if (arguments.length === 1) this[j].classList.toggle(classes[i]);
-          else add ? this[j].classList.add(classes[i]) : this[j].classList.remove(classes[i]);
+          if (arguments.length === 1) this[j].classList.toggle(classes[i])
+          else add ? this[j].classList.add(classes[i]) : this[j].classList.remove(classes[i])
         }
       }
     }
-    return this;
+    return this
   }
 }
 
 function likeArray(obj) {
   var length = !!obj && 'length' in obj && obj.length,
-    type = $.type(obj);
+    type = $.type(obj)
 
   return (
     'function' != type &&
@@ -188,18 +187,18 @@ function likeArray(obj) {
     ('array' == type ||
       length === 0 ||
       (typeof length == 'number' && length > 0 && length - 1 in obj))
-  );
+  )
 }
 
 // 去掉 null 节点
 function compact(array) {
   return filter.call(array, function (item) {
-    return item != null;
-  });
+    return item != null
+  })
 }
 
 function flatten(array) {
-  return array.length > 0 ? $.fn.concat.apply([], array) : array;
+  return array.length > 0 ? $.fn.concat.apply([], array) : array
 }
 
 // `$.zepto.fragment` takes a html string and an optional tag name
@@ -207,14 +206,14 @@ function flatten(array) {
 // The generated DOM nodes are returned as an array.
 // it compatible with browsers that don't support the DOM fully.
 function fragment(html, name, properties) {
-  let R;
+  let R
 
   // A special case optimization for a single tag
-  if (singleTagRE.test(html)) R = $(document.createElement(RegExp.$1));
+  if (singleTagRE.test(html)) R = $(document.createElement(RegExp.$1))
 
   if (!R) {
-    if (html.replace) html = html.replace(tagExpanderRE, '<$1></$2>');
-    if (name === undefined) name = fragmentRE.test(html) && RegExp.$1;
+    if (html.replace) html = html.replace(tagExpanderRE, '<$1></$2>')
+    if (name === undefined) name = fragmentRE.test(html) && RegExp.$1
 
     const containers = {
       tr: 'tbody',
@@ -226,28 +225,28 @@ function fragment(html, name, properties) {
       li: 'ul',
       option: 'select',
       '*': 'div',
-    };
+    }
 
-    if (!(name in containers)) name = '*';
-    const container = document.createElement(containers[name]);
-    container.innerHTML = '' + html;
+    if (!(name in containers)) name = '*'
+    const container = document.createElement(containers[name])
+    container.innerHTML = '' + html
     R = $.each(slice.call(container.childNodes), function () {
-      container.removeChild(this);
-    });
+      container.removeChild(this)
+    })
   }
 
   if ($.isPlainObject(properties)) {
-    const nodes = $(R);
+    const nodes = $(R)
     // special attributes that should be get/set via method calls
-    const methodAttributes = ['val', 'css', 'html', 'text', 'data', 'width', 'height', 'offset'];
+    const methodAttributes = ['val', 'css', 'html', 'text', 'data', 'width', 'height', 'offset']
 
     $.each(properties, (key, value) => {
-      if (methodAttributes.indexOf(key) > -1) nodes[key](value);
-      else nodes.attr(key, value);
-    });
+      if (methodAttributes.indexOf(key) > -1) nodes[key](value)
+      else nodes.attr(key, value)
+    })
   }
 
-  return R;
+  return R
 }
 
 /**
@@ -259,119 +258,119 @@ function fragment(html, name, properties) {
  * @returns Dom实例，D instance
  */
 function $(sel, ctx, name) {
-  let R = [];
+  let R = []
 
   if (sel) {
     if (!name && ctx === true) {
-      name = true;
-      ctx = null;
+      name = true
+      ctx = null
     }
 
     if (typeof sel === 'string') {
-      sel = (sel || '').trim();
+      sel = (sel || '').trim()
 
       if (sel[0] === '#') {
-        const dom = document.getElementById(sel.substr(1));
-        if (dom) R.push(dom);
+        const dom = document.getElementById(sel.substr(1))
+        if (dom) R.push(dom)
       } else if (sel[0] === '<' && fragmentRE.test(sel))
-        (R = fragment(sel, RegExp.$1, ctx)), (sel = null);
-      else if (ctx) return $(ctx).find(sel);
-      else R = $.qsa(sel);
+        (R = fragment(sel, RegExp.$1, ctx)), (sel = null)
+      else if (ctx) return $(ctx).find(sel)
+      else R = $.qsa(sel)
     } else if (sel.nodeType || sel === window || sel === document) {
-      R = [sel];
-      sel = null;
-    } else if (D.isD(sel)) return sel;
-    else if ($.isFunction(sel)) return document.ready(sel);
+      R = [sel]
+      sel = null
+    } else if (D.isD(sel)) return sel
+    else if ($.isFunction(sel)) return document.ready(sel)
     // 触摸或鼠标事件
     else if (
       $.isObject(sel) &&
       sel.target &&
       (sel.target.nodeType || sel.target === window || sel.target === document)
     ) {
-      R = [sel.target];
-      sel = null;
+      R = [sel.target]
+      sel = null
     } else {
       // normalize array if an array of nodes is given
-      if ($.isArray(sel)) R = compact(sel);
+      if ($.isArray(sel)) R = compact(sel)
       // Wrap DOM nodes.
       //else if ($.isObject(sel))
       // If it's a html fragment, create nodes from it
-      else if (fragmentRE.test(sel)) (R = fragment(sel, RegExp.$1, ctx)), (sel = null);
-      else if (ctx) return $(ctx).find(sel);
-      else R = $.qsa(sel);
+      else if (fragmentRE.test(sel)) (R = fragment(sel, RegExp.$1, ctx)), (sel = null)
+      else if (ctx) return $(ctx).find(sel)
+      else R = $.qsa(sel)
     }
   }
 
-  return new D(R, sel, name);
+  return new D(R, sel, name)
 }
 
 // plugin compatibility
-$.uuid = 0;
-$.expr = {};
-$.noop = function () {};
-$.support = support;
-$.fragment = fragment;
+$.uuid = 0
+$.expr = {}
+$.noop = function () {}
+$.support = support
+$.fragment = fragment
 
-const ObjToString = Object.prototype.toString;
+const ObjToString = Object.prototype.toString
 
 function getTag(value) {
   if (value == null) {
-    return value === undefined ? '[object Undefined]' : '[object Null]';
+    return value === undefined ? '[object Undefined]' : '[object Null]'
   }
-  return ObjToString.call(value);
+  return ObjToString.call(value)
 }
 
 // 静态属性,可直接调用，识别 boolean、string、number、object、date、array、regexp、function
 $.type = function (obj) {
-  return obj == null ? String(obj) : class2type[toString.call(obj)] || 'object';
-};
+  return obj == null ? String(obj) : class2type[toString.call(obj)] || 'object'
+}
 // eslint-disable-next-line func-names
 $.isWindow = function (o) {
-  return o != null && o == o.window;
-};
+  return o != null && o == o.window
+}
 // 纯对象变量，不包含函数、Date、正则、数组等对象
-$.isObject = v => $.type(v) === 'object';
-$.isMap = v => $.type(v) === 'Map';
-$.isSet = v => $.type(v) === 'Set';
-$.isRegExp = v => $.type(v) === 'RegExp';
-$.isSymbol = v => $.type(v) === 'symbol';
-$.isObj = $.isObject;
+$.isObject = v => $.type(v) === 'object'
+$.isMap = v => $.type(v) === 'Map'
+$.isSet = v => $.type(v) === 'Set'
+$.isRegExp = v => $.type(v) === 'RegExp'
+$.isSymbol = v => $.type(v) === 'symbol'
+$.isObj = $.isObject
 $.isPromise = val =>
-  ($.isObject(val) || $.isFunction(val)) && $.isFunction(val.then) && $.isFunction(val.catch);
+  ($.isObject(val) || $.isFunction(val)) && $.isFunction(val.then) && $.isFunction(val.catch)
 
 // 值变量
 $.isValue = function (o) {
-  return $.type(o) === 'string' || $.type(o) === 'number' || $.type(o) === 'boolean';
-};
-$.isVal = $.isValue;
+  return $.type(o) === 'string' || $.type(o) === 'number' || $.type(o) === 'boolean'
+}
+$.isVal = $.isValue
 
 // 函数变量
 $.isFunction = function (value) {
-  return $.type(value) === 'function';
-};
+  return $.type(value) === 'function'
+}
 
-$.isFun = $.isFunction;
+$.isFun = $.isFunction
 
 $.isDocument = function (o) {
-  return o != null && o.nodeType == o.DOCUMENT_NODE;
-};
-$.isDoc = $.isDocument;
+  return o != null && o.nodeType == o.DOCUMENT_NODE
+}
+$.isDoc = $.isDocument
 
 $.isPlainObject = function (o) {
-  return $.isObject(o) && !$.isWindow(o) && Object.getPrototypeOf(o) == Object.prototype;
-};
-$.isPlain = $.isPlainObject;
+  return $.isObject(o) && !$.isWindow(o) && Object.getPrototypeOf(o) == Object.prototype
+}
+$.isPlain = $.isPlainObject
 
 $.isEmptyObject = function (o) {
-  var name;
-  for (name in o) return false;
-  return true;
-};
+  var name
+  for (name in o) return false
+  return true
+}
 $.isEmpty = function (o) {
-  if ($.isObject(o)) return $.isEmptyObject(o);
-  else if ($.isArray(o)) return o.length === 0;
-  else return o === '' || o === null || o === undefined;
-};
+  if ($.isObject(o)) return $.isEmptyObject(o)
+  else if ($.isArray(o)) return o.length === 0
+  else return o === '' || o === null || o === undefined
+}
 
 /**
  * undefined or null
@@ -379,205 +378,205 @@ $.isEmpty = function (o) {
  * @returns
  */
 $.isNull = function (v) {
-  return v == null;
-};
+  return v == null
+}
 
 $.isBool = function (v) {
-  return $.type(v) === 'boolean';
-};
+  return $.type(v) === 'boolean'
+}
 
 $.hasVal = function (v) {
-  return !$.isEmpty(v);
-};
+  return !$.isEmpty(v)
+}
 $.isArray =
   Array.isArray ||
   function (object) {
-    return object instanceof Array;
-  };
+    return object instanceof Array
+  }
 $.inArray = function (elem, array, i) {
-  return emptyArray.indexOf.call(array, elem, i);
-};
+  return emptyArray.indexOf.call(array, elem, i)
+}
 
 // jQuery new Date() 判断为 数字
 $.isNumeric = function (val) {
-  return typeof val === 'number' || ($.isObject(val) && getTag(val) == '[object Number]');
-};
+  return typeof val === 'number' || ($.isObject(val) && getTag(val) == '[object Number]')
+}
 
-$.isNumber = $.isNumeric;
-$.isNum = $.isNumeric;
-$.isString = v => $.type(v) === 'string';
-$.isStr = $.isString;
-$.isDom = v => D.isD(v);
-$.isDate = v => $.type(v) === 'date';
+$.isNumber = $.isNumeric
+$.isNum = $.isNumeric
+$.isString = v => $.type(v) === 'string'
+$.isStr = $.isString
+$.isDom = v => D.isD(v)
+$.isDate = v => $.type(v) === 'date'
 
 $.isDateStr = function (v) {
-  return Date.parse(v) > 0;
-};
+  return Date.parse(v) > 0
+}
 
 $.isNumStr = function (v) {
-  return !Number.isNaN(Number(v));
-};
+  return !Number.isNaN(Number(v))
+}
 
 $.funcArg = function (context, arg, idx, payload) {
-  return $.isFunction(arg) ? arg.call(context, idx, payload) : arg;
-};
+  return $.isFunction(arg) ? arg.call(context, idx, payload) : arg
+}
 
 $.contains = document.documentElement.contains
   ? function (parent, node) {
-      return parent !== node && parent.contains(node);
+      return parent !== node && parent.contains(node)
     }
   : function (parent, node) {
-      while (node && (node = node.parentNode)) if (node === parent) return true;
-      return false;
-    };
+      while (node && (node = node.parentNode)) if (node === parent) return true
+      return false
+    }
 
 /**
  * 判断元素el是否匹配选择器sel
  */
 $.matches = function (el, sel) {
-  let R = false;
+  let R = false
 
   try {
-    if (!sel || !el) return false;
+    if (!sel || !el) return false
 
-    if (sel === document) R = el === document;
-    else if (sel === window) R = el === window;
-    else if (sel.nodeType) R = el === sel;
-    else if (sel instanceof D) R = ~sel.indexOf(el);
+    if (sel === document) R = el === document
+    else if (sel === window) R = el === window
+    else if (sel.nodeType) R = el === sel
+    else if (sel instanceof D) R = ~sel.indexOf(el)
     else if (el.nodeType === 1 && typeof sel === 'string') {
       const match =
         el.matches ||
         el.webkitMatchesSelector ||
         el.mozMatchesSelector ||
         el.oMatchesSelector ||
-        el.matchesSelector;
+        el.matchesSelector
 
-      if (match) R = match.call(el, sel);
+      if (match) R = match.call(el, sel)
       else {
         // fall back to performing a selector:
-        let parent = el.parentNode;
-        const temp = !parent;
-        if (temp) (parent = tempParent).appendChild(el);
-        R = ~$.qsa(sel, parent).indexOf(el);
-        temp && tempParent.removeChild(el);
+        let parent = el.parentNode
+        const temp = !parent
+        if (temp) (parent = tempParent).appendChild(el)
+        R = ~$.qsa(sel, parent).indexOf(el)
+        temp && tempParent.removeChild(el)
       }
     }
   } catch (e) {
-    console.log('matches exp:', e.message);
+    console.log('matches exp:', e.message)
   }
 
-  return R;
-};
+  return R
+}
 
 $.trim = function (str) {
-  return str == null ? '' : String.prototype.trim.call(str);
-};
+  return str == null ? '' : String.prototype.trim.call(str)
+}
 
 // 遍历数组或对象元素，生成新的数组
 $.map = function (els, cb) {
-  const R = [];
+  const R = []
   if (likeArray(els))
     for (let i = 0; i < els.length; i++) {
       try {
-        const v = cb(els[i], i);
-        if (v != null) R.push(v);
+        const v = cb(els[i], i)
+        if (v != null) R.push(v)
       } catch (e) {
-        console.log('map exp:', e.message);
+        console.log('map exp:', e.message)
       }
     }
   else {
     els.keys.forEach(k => {
       try {
-        const v = cb(els[k], k);
-        if (v != null) R.push(v);
+        const v = cb(els[k], k)
+        if (v != null) R.push(v)
       } catch (e) {
-        console.log('map exp:', e.message);
+        console.log('map exp:', e.message)
       }
-    });
+    })
   }
-  return flatten(R); // 拉平
-};
+  return flatten(R) // 拉平
+}
 
 // 数组中的节点元素作为this参数，传递到cb中，返回数组
 $.each = function (els, cb) {
-  var i, key;
+  var i, key
   if (likeArray(els)) {
-    for (i = 0; i < els.length; i++) if (cb.call(els[i], i, els[i]) === false) return els;
+    for (i = 0; i < els.length; i++) if (cb.call(els[i], i, els[i]) === false) return els
   } else {
-    for (key in els) if (cb.call(els[key], key, els[key]) === false) return els;
+    for (key in els) if (cb.call(els[key], key, els[key]) === false) return els
   }
 
-  return els;
-};
+  return els
+}
 
 $.forEach = function (els, cb) {
-  var i, key;
+  var i, key
   if (likeArray(els)) {
-    for (i = 0; i < els.length; i++) if (cb.call(els[i], els[i], i) === false) return els;
+    for (i = 0; i < els.length; i++) if (cb.call(els[i], els[i], i) === false) return els
   } else {
-    for (key in els) if (cb.call(els[key], els[key], key) === false) return els;
+    for (key in els) if (cb.call(els[key], els[key], key) === false) return els
   }
 
-  return els;
-};
+  return els
+}
 
 $.grep = function (els, cb) {
-  return filter.call(els, cb);
-};
+  return filter.call(els, cb)
+}
 
 // Populate the class2type map
 $.each(
   'Boolean Number String Function Array Date RegExp Object Error'.split(' '),
   function (i, name) {
-    class2type['[object ' + name + ']'] = name.toLowerCase();
+    class2type['[object ' + name + ']'] = name.toLowerCase()
   }
-);
+)
 
 $.id = function (x) {
-  return document.getElementById(x);
-};
+  return document.getElementById(x)
+}
 
 $.qu = $.qs = function (sel, ctx) {
-  var R = null;
+  var R = null
   try {
-    let el = ctx;
-    if (!ctx) el = document;
-    else if (D.isD(ctx)) el = ctx[0];
+    let el = ctx
+    if (!ctx) el = document
+    else if (D.isD(ctx)) el = ctx[0]
 
     var maybeID = sel[0] == '#',
       nameOnly = maybeID ? sel.slice(1) : sel, // Ensure that a 1 char tag name still gets checked
-      isSimple = simpleSelectorRE.test(nameOnly);
+      isSimple = simpleSelectorRE.test(nameOnly)
 
     if (document.getElementById && isSimple && maybeID)
       // Safari DocumentFragment doesn't have getElementById
-      R = document.getElementById(nameOnly);
-    else R = el.querySelector(sel);
+      R = document.getElementById(nameOnly)
+    else R = el.querySelector(sel)
   } catch (e) {
-    console.error('$.qu/qs exp:', e.message);
+    console.error('$.qu/qs exp:', e.message)
   }
 
-  return R;
-};
+  return R
+}
 
 // `$.qsa` is Dom's CSS selector implementation which
 // uses `.querySelectorAll` and optimizes for some special cases, like `#id`.
 // 返回数组, 便于 forEach，参数与zepto参数相反
 $.qus = $.qsa = function (sel, ctx) {
-  var R = [];
+  var R = []
   try {
-    let el = ctx;
-    if (!ctx) el = document;
-    else if (D.isD(ctx)) el = ctx[0];
+    let el = ctx
+    if (!ctx) el = document
+    else if (D.isD(ctx)) el = ctx[0]
 
     var found,
       maybeID = sel[0] == '#',
       maybeClass = !maybeID && sel[0] == '.',
       nameOnly = maybeID || maybeClass ? sel.slice(1) : sel, // Ensure that a 1 char tag name still gets checked
-      isSimple = simpleSelectorRE.test(nameOnly);
+      isSimple = simpleSelectorRE.test(nameOnly)
 
     if (document.getElementById && isSimple && maybeID)
       // Safari DocumentFragment doesn't have getElementById
-      R = (found = document.getElementById(nameOnly)) ? [found] : [];
+      R = (found = document.getElementById(nameOnly)) ? [found] : []
     else if (el.nodeType === 1 || el.nodeType === 9 || el.nodeType === 11) {
       try {
         const ns =
@@ -585,19 +584,19 @@ $.qus = $.qsa = function (sel, ctx) {
             ? maybeClass
               ? el.getElementsByClassName(nameOnly) // If it's simple, it could be a class
               : el.getElementsByTagName(sel) // Or a tag
-            : el.querySelectorAll(sel); // Or it's not simple, and we need to query all
+            : el.querySelectorAll(sel) // Or it's not simple, and we need to query all
 
-        if (ns && ns.length > 0) R = slice.call(ns);
+        if (ns && ns.length > 0) R = slice.call(ns)
       } catch (e) {
-        console.error('$.qus/qsa exp:', e.message);
+        console.error('$.qus/qsa exp:', e.message)
       }
     }
   } catch (e) {
-    console.error('$.qus/qsa exp:', e.message);
+    console.error('$.qus/qsa exp:', e.message)
   }
 
-  return R;
-};
+  return R
+}
 
 /**
  * 通过name获得dom对象
@@ -606,43 +605,43 @@ $.qus = $.qsa = function (sel, ctx) {
  * @param {object} ctx parent dom
  */
 $.qn = function qn(name, ctx) {
-  const sel = `[name="${name}"]`;
-  return $.qu(sel, ctx);
-};
+  const sel = `[name="${name}"]`
+  return $.qu(sel, ctx)
+}
 
 // 返回指定name数组, 便于 forEach
 // 效率高于qus
 $.qns = function (name, ctx) {
-  var R = null;
-  if (ctx) R = $.qus(`[name="${name}"]`, ctx);
+  var R = null
+  if (ctx) R = $.qus(`[name="${name}"]`, ctx)
   else {
-    R = document.getElementsByName(name);
-    if (R && R.length > 0) R = slice.call(R);
-    else R = [];
+    R = document.getElementsByName(name)
+    if (R && R.length > 0) R = slice.call(R)
+    else R = []
   }
 
-  return R;
-};
+  return R
+}
 
 // 返回指定class name数组, 便于 forEach
 // 效率高于qus
 $.qcs = function (sel, ctx) {
-  var R = null;
-  if (ctx) R = D.isD(ctx) ? ctx[0].getElementsByClassName(sel) : ctx.getElementsByClassName(sel);
-  else R = document.getElementsByClassName(sel);
-  if (R && R.length > 0) return slice.call(R);
-  else return [];
-};
+  var R = null
+  if (ctx) R = D.isD(ctx) ? ctx[0].getElementsByClassName(sel) : ctx.getElementsByClassName(sel)
+  else R = document.getElementsByClassName(sel)
+  if (R && R.length > 0) return slice.call(R)
+  else return []
+}
 
 // 返回指定tag name数组, 便于 forEach
 // 效率高于qus
 $.qts = function (sel, ctx) {
-  var R = null;
-  if (ctx) R = D.isD(ctx) ? ctx[0].getElementsByTagName(sel) : ctx.getElementsByTagName(sel);
-  else R = document.getElementsByTagName(sel);
-  if (R && R.length > 0) return slice.call(R);
-  else return [];
-};
+  var R = null
+  if (ctx) R = D.isD(ctx) ? ctx[0].getElementsByTagName(sel) : ctx.getElementsByTagName(sel)
+  else R = document.getElementsByTagName(sel)
+  if (R && R.length > 0) return slice.call(R)
+  else return []
+}
 
 /**
  * Copy all but undefined properties from one or more to dst
@@ -654,17 +653,17 @@ $.qts = function (sel, ctx) {
  */
 function assign(to, src, deep) {
   if (src !== undefined && src !== null) {
-    const ks = Object.keys(Object(src));
+    const ks = Object.keys(Object(src))
     //   for (key in src) {
     for (let i = 0, len = ks.length; i < len; i += 1) {
-      const k = ks[i];
-      const desc = Object.getOwnPropertyDescriptor(src, k);
+      const k = ks[i]
+      const desc = Object.getOwnPropertyDescriptor(src, k)
       if (desc !== undefined && desc.enumerable) {
         if (deep && ($.isPlainObject(src[k]) || $.isArray(src[k]))) {
-          if ($.isPlainObject(src[k]) && !$.isPlainObject(to[k])) to[k] = {};
-          if ($.isArray(src[k]) && !$.isArray(to[k])) to[k] = [];
-          assign(to[k], src[k], deep);
-        } else to[k] = src[k];
+          if ($.isPlainObject(src[k]) && !$.isPlainObject(to[k])) to[k] = {}
+          if ($.isArray(src[k]) && !$.isArray(to[k])) to[k] = []
+          assign(to[k], src[k], deep)
+        } else to[k] = src[k]
       }
     }
   }
@@ -676,109 +675,109 @@ function assign(to, src, deep) {
  * 第一个参数为 true，为深拷贝，
  */
 $.assign = function (to, ...srcs) {
-  if (to === undefined || to === null) return {};
+  if (to === undefined || to === null) return {}
 
-  let deep;
+  let deep
   if (typeof to === 'boolean') {
-    deep = to;
-    to = srcs.shift();
+    deep = to
+    to = srcs.shift()
   }
   srcs.forEach(src => {
-    assign(to, src, deep);
-  });
-  return to;
-};
+    assign(to, src, deep)
+  })
+  return to
+}
 
-$.extend = $.assign;
+$.extend = $.assign
 
 $.merge = function (...args) {
-  const to = args[0];
-  args.splice(0, 1);
+  const to = args[0]
+  args.splice(0, 1)
   args.forEach(src => {
-    assign(to, src, false);
-  });
-  return to;
-};
+    assign(to, src, false)
+  })
+  return to
+}
 
 $.fastLink = function (ctx) {
   // fastLink a 标签加载 touchstart 事件,避免 300毫秒等待，带back attr，调用浏览器返回
   try {
-    const links = $.qus('a[fastLink][fastlink][back]', ctx);
+    const links = $.qus('a[fastLink][fastlink][back]', ctx)
     links.forEach(link => {
       if ($.support.touch) {
-        let startX;
-        let startY;
+        let startX
+        let startY
         link.ontouchstart = ev => {
-          startX = ev.changedTouches[0].clientX;
-          startY = ev.changedTouches[0].clientY;
-        };
+          startX = ev.changedTouches[0].clientX
+          startY = ev.changedTouches[0].clientY
+        }
         link.ontouchend = ev => {
           if (
             Math.abs(ev.changedTouches[0].clientX - startX) <= 5 &&
             Math.abs(ev.changedTouches[0].clientY - startY) <= 5
           ) {
             // ev.preventDefault();
-            if (link.hasAttribute('back')) return window.history.back();
-            if (link.href) window.location.href = link.href;
+            if (link.hasAttribute('back')) return window.history.back()
+            if (link.href) window.location.href = link.href
           }
-        };
+        }
       } else if (link.hasAttribute('back')) {
         link.onclick = ev => {
-          return window.history.back();
-        };
+          return window.history.back()
+        }
       }
-    });
+    })
   } catch (e) {
-    alert(`fastLink exp: ${e.message}`);
+    alert(`fastLink exp: ${e.message}`)
   }
-};
+}
 
 $.requestAnimationFrame = function (callback) {
-  if (window.requestAnimationFrame) return window.requestAnimationFrame(callback);
-  else if (window.webkitRequestAnimationFrame) return window.webkitRequestAnimationFrame(callback);
-  return window.setTimeout(callback, 1000 / 60);
-};
+  if (window.requestAnimationFrame) return window.requestAnimationFrame(callback)
+  else if (window.webkitRequestAnimationFrame) return window.webkitRequestAnimationFrame(callback)
+  return window.setTimeout(callback, 1000 / 60)
+}
 
 $.cancelAnimationFrame = function (id) {
-  if (window.cancelAnimationFrame) return window.cancelAnimationFrame(id);
-  else if (window.webkitCancelAnimationFrame) return window.webkitCancelAnimationFrame(id);
-  return window.clearTimeout(id);
-};
+  if (window.cancelAnimationFrame) return window.cancelAnimationFrame(id)
+  else if (window.webkitCancelAnimationFrame) return window.webkitCancelAnimationFrame(id)
+  return window.clearTimeout(id)
+}
 $.deleteProps = function (obj) {
-  const object = obj;
+  const object = obj
   Object.keys(object).forEach(key => {
     try {
-      object[key] = null;
+      object[key] = null
     } catch (e) {
       // no setter for object
     }
     try {
-      delete object[key];
+      delete object[key]
     } catch (e) {
       // something got wrong
     }
-  });
-};
+  })
+}
 
 // 下个事件周期触发
 $.nextTick = function (cb, delay = 0) {
-  return setTimeout(cb, delay);
-};
+  return setTimeout(cb, delay)
+}
 
 // 类似 setTimeout的精准动画帧时间出发
 $.nextFrame = function (cb) {
   return $.requestAnimationFrame(() => {
-    $.requestAnimationFrame(cb);
-  });
-};
+    $.requestAnimationFrame(cb)
+  })
+}
 
 $.now = function () {
-  return Date.now();
-};
+  return Date.now()
+}
 
 $.exp = function (info, e) {
-  console.error(`${info} exp:${e.message}`);
-};
+  console.error(`${info} exp:${e.message}`)
+}
 
 /**
  * 格式化日期，主要用于MongoDb数据库中返回的ISODate格式转换为本地时区指定字符串格式。
@@ -815,31 +814,31 @@ $.exp = function (info, e) {
  *  fmt为日期，则返回Date实例
  */
 $.date = function (fmt, d) {
-  if (!fmt) fmt = 'yyyy-MM-dd';
+  if (!fmt) fmt = 'yyyy-MM-dd'
   else if (/^\d{4}[-/]\d{1,2}[-/]\d{1,2}/.test(fmt)) {
     //  2022-10-10 => 2022/10/10
-    if (/^\d{4}[-]\d{1,2}[-]\d{1,2}$/.test(fmt)) fmt = fmt.replace(/-/g, '/');
-    let R = new Date(fmt);
+    if (/^\d{4}[-]\d{1,2}[-]\d{1,2}$/.test(fmt)) fmt = fmt.replace(/-/g, '/')
+    let R = new Date(fmt)
     if (d && $.isNumber(d))
       // 加减 天数
-      R = new Date(R.getTime() + d * 86400000);
-    return R;
+      R = new Date(R.getTime() + d * 86400000)
+    return R
   }
 
-  if (!d) d = new Date();
+  if (!d) d = new Date()
   else if (typeof d === 'string') {
     //  2022-10-10 => 2022/10/10
-    if (/^\d{4}[-]\d{1,2}[-]\d{1,2}$/.test(d)) d = d.replace(/-/g, '/');
+    if (/^\d{4}[-]\d{1,2}[-]\d{1,2}$/.test(d)) d = d.replace(/-/g, '/')
     // 兼容标准时间字符串
     // .replace(/T/g, ' ')
     // .replace(/\.+[0-9]+[A-Z]$/, '');
     // 还原为标准时间，getTimezoneOffset UTC与当地时差分钟数，比如中国是 -480分钟
     // d = new Date(d).getTime() - 60000 * new Date().getTimezoneOffset();
     // Date自动处理时区，ISODate格式不处理时区，本地普通字符串格式-8小时
-    d = new Date(d);
+    d = new Date(d)
   } else if ($.isNumber(d))
     // 加减 天数
-    d = new Date(Date.now() + d * 86400000);
+    d = new Date(Date.now() + d * 86400000)
 
   // Date.getXXX 函数会自动还原时区！！！
   const o = {
@@ -852,51 +851,51 @@ $.date = function (fmt, d) {
     s: d.getSeconds(), // 秒
     q: Math.floor((d.getMonth() + 3) / 3), // 季度
     S: d.getMilliseconds().toString().padStart(3, '0'), // 毫秒
-  };
+  }
 
   // yy几个就返回 几个数字，使用 slice -4 倒数4个，再往后
-  fmt = fmt.replace(/(S+)/g, o.S).replace(/(y+)/gi, v => o.y.slice(-v.length));
+  fmt = fmt.replace(/(S+)/g, o.S).replace(/(y+)/gi, v => o.y.slice(-v.length))
   fmt = fmt.replace(/(M+|d+|h+|H+|m+|s+|q+)/g, v =>
     ((v.length > 1 ? '0' : '') + o[v.slice(-1)]).slice(-2)
-  );
+  )
 
-  return fmt.replace(/\s+00:00:00$/g, '');
-};
+  return fmt.replace(/\s+00:00:00$/g, '')
+}
 
 $.uniqueNumber = function () {
-  uniqueNumber += 1;
-  return uniqueNumber;
-};
+  uniqueNumber += 1
+  return uniqueNumber
+}
 
-$.num = $.uniqueNumber;
+$.num = $.uniqueNumber
 
 $.uid = function (mask = 'xxxxxxxxxx', map = '0123456789abcdef') {
-  const {length} = map;
-  return mask.replace(/x/g, () => map[Math.floor(Math.random() * length)]);
-};
+  const {length} = map
+  return mask.replace(/x/g, () => map[Math.floor(Math.random() * length)])
+}
 
 $.camelCase = function (str) {
   return str.toLowerCase().replace(/-+(.)/g, (match, chr) => {
-    return chr ? chr.toUpperCase() : '';
-  });
-};
+    return chr ? chr.toUpperCase() : ''
+  })
+}
 
 $.uniq = function (array) {
   return filter.call(array, (item, idx) => {
-    return array.indexOf(item) === idx;
-  });
-};
+    return array.indexOf(item) === idx
+  })
+}
 
 // two params promisify
 $.promisify = function (f) {
   return (...arg) =>
     new Promise((res, rej) => {
       f(...arg, (err, rs) => {
-        if (err) rej(err);
-        else res(rs);
-      });
-    });
-};
+        if (err) rej(err)
+        else res(rs)
+      })
+    })
+}
 
 // one param promisify
 $.promise = function (f) {
@@ -904,36 +903,51 @@ $.promise = function (f) {
     new Promise((res, rej) => {
       try {
         f(...arg, rs => {
-          res(rs);
-        });
+          res(rs)
+        })
       } catch (ex) {
-        rej(ex.message);
+        rej(ex.message)
       }
-    });
-};
+    })
+}
 
-$.urlParam = function (url) {
-  const query = {};
-  let urlToParse = url || window.location.href;
-  let i;
-  let params;
-  let param;
-  let length;
-  if (typeof urlToParse === 'string' && urlToParse.length) {
-    urlToParse = urlToParse.indexOf('?') > -1 ? urlToParse.replace(/\S*\?/, '') : '';
-    params = urlToParse.split('&').filter(paramsPart => paramsPart !== '');
-    length = params.length;
+/**
+ * 解析参数，? 后面 # 前面，& 分隔字符串变换成对象
+ * @param {string} [url] - 缺省 window.location.href
+ * @returns {Object<string, *>}
+ */
+$.urlParam = url => {
+  /** @type {Object<string, *>} */
+  let R
+  try {
+    let str = url || window.location.href
+    if (!str) return
 
-    for (i = 0; i < length; i += 1) {
-      param = params[i].replace(/#\S+/g, '').split('=');
-      query[decodeURIComponent(param[0])] =
-        typeof param[1] === 'undefined'
-          ? undefined
-          : decodeURIComponent(param.slice(1).join('=')) || '';
+    let pos = str.indexOf('?')
+    if (pos !== -1) str = str.slice(pos + 1)
+    pos = str.indexOf('#')
+    if (pos !== -1) str = str.slice(0, pos)
+    const ps = str.split('&')
+    for (str of ps) {
+      if (!str) continue
+      pos = str.indexOf('=')
+      let name = str
+      let val = ''
+      if (pos !== -1) {
+        name = str.slice(0, pos)
+        val = str.slice(pos + 1)
+        if (val === 'undefined') val = undefined
+        else if (val === 'null') val = null
+        else val = decodeURIComponent(val)
+      }
+      if (!R) R = {}
+      R[decodeURIComponent(name)] = val
     }
+  } catch (e) {
+    console.error(`urlParam exp:${e.message}`)
   }
-  return query;
-};
+  return R
+}
 
 // "true"  => true
 // "false" => false
@@ -950,41 +964,41 @@ $.deserializeValue = function (value) {
           (value == 'false'
             ? false
             : value == 'null'
-            ? null
-            : +value + '' == value
-            ? +value
-            : /^[\[\{]/.test(value)
-            ? JSON.parse(value)
-            : value)
-      : value;
+              ? null
+              : +value + '' == value
+                ? +value
+                : /^[\[\{]/.test(value)
+                  ? JSON.parse(value)
+                  : value)
+      : value
   } catch (e) {
-    return value;
+    return value
   }
-};
+}
 
 $.fullScreen = function (el) {
   if (el.requestFullscreen) {
-    el.requestFullscreen();
+    el.requestFullscreen()
   } else if (el.mozRequestFullScreen) {
-    el.mozRequestFullScreen();
+    el.mozRequestFullScreen()
   } else if (el.webkitRequestFullscreen) {
-    el.webkitRequestFullscreen();
+    el.webkitRequestFullscreen()
   } else if (el.msRequestFullscreen) {
-    el.msRequestFullscreen();
+    el.msRequestFullscreen()
   }
-};
+}
 
 $.exitFullScreen = function () {
   if (document.exitFullScreen) {
-    document.exitFullScreen();
+    document.exitFullScreen()
   } else if (document.mozCancelFullScreen) {
-    document.mozCancelFullScreen();
+    document.mozCancelFullScreen()
   } else if (document.webkitExitFullscreen) {
-    document.webkitExitFullscreen();
+    document.webkitExitFullscreen()
   } else if (document.msExitFullscreen) {
-    document.msExitFullscreen();
+    document.msExitFullscreen()
   }
-};
+}
 
 $.isFullScreen = function () {
   return !!(
@@ -993,15 +1007,15 @@ $.isFullScreen = function () {
     document.webkitIsFullScreen ||
     document.webkitFullScreen ||
     document.msFullScreen
-  );
-};
+  )
+}
 
-$.ready = document.ready;
-$.fn = D.prototype;
-$.Class = D;
-$.Dom = D;
+$.ready = document.ready
+$.fn = D.prototype
+$.Class = D
+$.Dom = D
 // ssr
-$.window = window;
-$.document = document;
+$.window = window
+$.document = document
 
-export default $;
+export default $

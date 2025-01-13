@@ -1,8 +1,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
-const gulp = require('gulp');
-const fs = require('fs-extra');
-const build = require('./script/build');
-const configs = require('./script/config');
+import gulp from 'gulp'
+import fs from 'fs-extra'
+import { build } from './script/build.mjs'
+import configs from './script/config.mjs'
 
 const nodeEnv = process.env.NODE_ENV || 'development';
 const src = './src';
@@ -26,7 +26,7 @@ async function clean(cb) {
 }
 
 /**
- * 同时生成umd、cjs、es 三种格式输出文件
+ * 同时生成umd、cjs、esm 三种格式输出文件
  */
 const buildAll = gulp.series(clean, cb => {
   console.log('start build ...');
@@ -44,7 +44,7 @@ gulp.task('cjs', cb => {
 });
 
 /**
- * 仅生成 es 格式
+ * 仅生成 esm 格式
  */
 gulp.task('esm', cb => {
   console.log('dev esm...');
@@ -67,5 +67,5 @@ gulp.task('watch', () => {
   gulp.watch(`${src}/*.js`, gulp.series([buildAll]));
 });
 
-module.default = buildAll;
-module.exports = {build: buildAll};
+export default buildAll
+export { buildAll as build }

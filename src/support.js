@@ -1,5 +1,5 @@
 /** 
- * �Ƿ�֧�ִ��� touch�ȹ���
+ * 是否支持触摸 touch等功能
 */
 
 let _support;

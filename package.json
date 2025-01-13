@@ -6,8 +6,10 @@
 	"module": "./dist/index.esm.js",
   "types": "./dist/base.d.ts",
   "scripts": {
-    "build": "cross-env NODE_ENV=production gulp build",
-    "dev": "cross-env NODE_ENV=development gulp build"
+    "dev": "cross-env NODE_ENV=development gulp build -f gulpfile.mjs",
+    "build": "cross-env NODE_ENV=production gulp build -f gulpfile.mjs",
+    "lib": "swc --config-file ./.swcrc ./src -w -d lib",
+    "release": "bash release.sh"    
   },
   "repository": {
     "type": "git",

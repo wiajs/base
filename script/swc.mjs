@@ -31,7 +31,7 @@ const getOpt = (dev = false, cli = false) => {
         },
       },
       loose: true,
-      target: 'es2022', // es5,es6,es2020,es2021,es2022
+      target: 'es5', // es5,es6,es2020,es2021,es2022
       externalHelpers: false,
       keepClassNames: true, // 保留原始类名
     },

@@ -27,11 +27,10 @@ const banner = `/*!
 const env = process.env.NODE_ENV || 'development'
 const isDev = env !== 'production'
 
+// 根路径
 const dir = _path => path.resolve(__dirname, '../', _path)
 
 const input = dir('./src/index.js')
-
-const _swc = false // 是否使用 swc 替代 babel 编译
 
 /**
  * 从 package.json 和 builtinModules 中获取不打包的引用库
@@ -47,7 +46,7 @@ const external = [
   /@babel\/runtime/, // babel helpers  @babel/runtime-corejs3/
 ]
 
-module.exports = [
+const configs = [
   // browser dev
   {
     file: dir('dist/base.cjs'), // cjs格式，后端打包，保留引用
@@ -66,7 +65,7 @@ module.exports = [
     file: dir('dist/base.js'), // umd格式，es5语法，web直接加载，合并引用
     format: 'umd',
     browser: true,
-    es5: true,
+    es5: true, // 兼容旧版本浏览器
     name, // 全局名称，替换 window.name
     exports: 'default', // default 方式输出单一包
     external: [],
@@ -81,7 +80,6 @@ module.exports = [
  */
 function genConfig({browser = true, es5 = false, ...cfg}) {
   const config = {
-    swc: _swc,
     input: {
       input,
       external: cfg.external, // 外部变量，不打入包中
@@ -89,24 +87,19 @@ function genConfig({browser = true, es5 = false, ...cfg}) {
       plugins: [
         // node_modules 中超ES6已转换为ES6
         resolve({browser}), // 从 node_modules 合并文件，pkg的browser文件替换 mainFields: ['browser']
-        commonjs(), // common 转换为 es6
+        commonjs(), // common 转换为 es6，rollup 只支持 es6
         // 替换特定字符串
         replace({
           preventAssignment: true, // 避免赋值替换  xxx = false -> false = false
           'process.env.NODE_ENV': JSON.stringify(env),
+          'process.env.NODE_TEST': JSON.stringify('false'),
           'process.browser': !!browser,
           __VERSION__: version,
         }),
         // 根据需要，将es6 转换为 es5，兼容所有浏览器，依赖@babel/runtime-corejs3 polyfill
-        !_swc && // eslint-disable-line
-          es5 && // eslint-disable-line
-          // babel({babelHelpers: 'bundled', presets: ['@babel/preset-env']}),
-          babel({
-            // 'bundled' | 'runtime' | 'inline' | 'external' Default: 'bundled'
-            babelHelpers: 'runtime', // 需配置plugin-transform-runtime
-            // sourceMaps: isDev,
-            configFile: dir('babel.web.js'),
-          }),
+        es5 && //swc(), // eslint-disable-line
+          swc({swc: getJsOpt(false, false)}),
+        // swc({swc: {jsc: {target: 'es5'}}}),
       ],
     },
     output: {
@@ -127,3 +120,5 @@ function genConfig({browser = true, es5 = false, ...cfg}) {
 
   return config
 }
+
+export default configs

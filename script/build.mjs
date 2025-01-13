@@ -1,11 +1,8 @@
 import fs from 'node:fs'
 import zlib from 'node:zlib'
 import path from 'node:path'
-import {minify} from 'terser'
 import {rollup} from 'rollup'
-import {transform} from '@swc/core'
-
-const {extname} = path
+import {minify} from '@swc/core'
 
 const env = process.env.NODE_ENV || 'development'
 
@@ -49,26 +46,22 @@ function onwarn({loc, frame, message}) {
  * 根据配置输出打包文件
  * @param {*}
  */
-async function buildEntry({swc, input, output}) {
+async function buildEntry({input, output}) {
   let bundle
   try {
     input.onwarn = onwarn
-    bundle = await rollup.rollup(input)
+    bundle = await rollup(input)
+    // console.log({output});
 
     const {file, banner, format} = output
-    let rt
-    if (swc && output.format === 'umd')
-      rt = await bundle.generate(output) // 不写入文件
-    else rt = await bundle.write(output) // 写入文件
+    // bundle.generate(output); // 不写入文件
+    const rt = await bundle.write(output) // 写入文件
 
     const {code} = rt.output[0]
     report(code, file) // 文件尺寸
 
     // 生产输出 压缩版本
-    if (format === 'umd') {
-      if (swc) es5(code, banner, file)
-      else min(code, banner, file)
-    }
+    if (format === 'umd') min(code, banner, file)
   } catch (e) {
     console.error(`buildEntry exp:${e.message}`)
   }
@@ -83,63 +76,12 @@ async function buildEntry({swc, input, output}) {
  * @param {*} file
  * @returns
  */
-async function es5(code, banner, file) {
-  let R = null
-
-  try {
-    const opt = {
-      jsc: {
-        parser: {
-          syntax: 'ecmascript',
-          jsx: false,
-        },
-        target: 'es5',
-        loose: true,
-        minify: {
-          compress: false,
-          mangle: false,
-        },
-      },
-      module: {
-        type: 'es6',
-      },
-      minify: false,
-      isModule: true,
-      sourceMaps: true,
-    }
-
-    const out = await transform(code, opt)
-    write(file, `${banner}\n${out.code}//# sourceMappingURL=base.map`)
-    write(`${file}.map`, out.map, false)
-
-    min(out.code, banner, file)
-    // opt.minify = true;
-    // const out2 = await transform(code, opt);
-    // const minCode = (banner ? `${banner}\n` : '') + out2.code;
-
-    // // �첽д��
-    // const ext = path.extname(file);
-    // write(file.replace(ext, `.min${ext}`), minCode, true, true, true);
-    R = true
-  } catch (e) {
-    console.error(` exp:${e.message}`)
-  }
-
-  return R
-}
-
-/**
- * ѹ��������ļ�
- * @param {*} code
- * @param {*} banner
- * @param {*} file
- * @returns
- */
 async function min(code, banner, file) {
   let R = null
 
   try {
-    let {code: minCode} = await minify(code, {
+    // terser
+    const opts2 = {
       sourceMap: false,
       toplevel: true, // 删除顶层作用域中未引用函数和变量，默认false
       output: {
@@ -148,7 +90,30 @@ async function min(code, banner, file) {
       compress: {
         pure_funcs: null, // ['makeMap', 'console.log'], 无副作用函数，可摇树删除
       },
-    })
+    }
+
+    // swc
+    const opts = {
+      compress: {
+        drop_console: true, // 删除 `console.log` 等调试信息
+        drop_debugger: true, // 删除 debugger
+        dead_code: true,
+        unused: true, // 删除未使用的变量和函数
+      },
+      format: {
+        comments: false, // 仅保留特定注释，例如 /*! */   false
+        asciiOnly: true, // 将非 ASCII 字符转为 Unicode 转义
+      },
+      ecma: 5, // 5: ES5 6或2015: ES6  specify one of: 5, 2015, 2016, etc.
+      mangle: true,
+      module: false, // 指定是否将代码视为模块  "unknown"
+      safari10: true, // Safari 10 的特定问题，如 for-of 迭代器兼容性
+      // toplevel: true, // 缺省 false，优化顶层作用域的变量和函数
+      sourceMap: false, // 为压缩后的代码生成 source map 文件，便于调试
+      toplevel: true, // 删除顶层作用域中未引用函数和变量，默认false
+    }
+
+    let {code: minCode} = await minify(code, opts)
 
     minCode = (banner ? `${banner}\n` : '') + minCode
 
@@ -169,7 +134,7 @@ function report(code, dest, extra) {
 }
 
 /**
- * д���ļ�
+ * 写入文件
  * @param {*} dest
  * @param {*} code
  * @param {*} zip
@@ -206,4 +171,4 @@ function blue(str) {
   return `\x1b[1m\x1b[34m${str}\x1b[39m\x1b[22m`
 }
 
-module.exports = build
+export {build}

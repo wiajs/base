@@ -16,10 +16,11 @@ wiamap.yml
 
 package.json
 package-lock.json
-package
 yarn.lock
 
+node_modules
 dist
+bin
 doc
 .vscode
-node_modules
+
