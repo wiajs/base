@@ -1,5 +1,5 @@
 /*!
-  * wia base v1.2.3
+  * wia base v1.2.7
   * (c) 2014 Sibyl Yu
   * Licensed under the Elastic License 2.0.
   * You may not use this file except in compliance with the Elastic License.
@@ -975,27 +975,29 @@ $$1.urlParam = url => {
   let R;
   try {
     let str = url || window.location.href;
-    if (!str) return
+    if (!str) return R
 
     let pos = str.indexOf('?');
-    if (pos !== -1) str = str.slice(pos + 1);
-    pos = str.indexOf('#');
-    if (pos !== -1) str = str.slice(0, pos);
-    const ps = str.split('&');
-    for (str of ps) {
-      if (!str) continue
-      pos = str.indexOf('=');
-      let name = str;
-      let val = '';
-      if (pos !== -1) {
-        name = str.slice(0, pos);
-        val = str.slice(pos + 1);
-        if (val === 'undefined') val = undefined;
-        else if (val === 'null') val = null;
-        else val = decodeURIComponent(val);
+    if (pos !== -1) {
+      str = str.slice(pos + 1);
+      pos = str.indexOf('#');
+      if (pos !== -1) str = str.slice(0, pos);
+      const ps = str.split('&');
+      for (str of ps) {
+        if (!str) continue
+        pos = str.indexOf('=');
+        let name = str;
+        let val = '';
+        if (pos !== -1) {
+          name = str.slice(0, pos);
+          val = str.slice(pos + 1);
+          if (val === 'undefined') val = undefined;
+          else if (val === 'null') val = null;
+          else val = decodeURIComponent(val);
+        }
+        if (!R) R = {};
+        R[decodeURIComponent(name)] = val;
       }
-      if (!R) R = {};
-      R[decodeURIComponent(name)] = val;
     }
   } catch (e) {
     console.error(`urlParam exp:${e.message}`);
@@ -1183,7 +1185,7 @@ const Event = /*#__PURE__*/Object.freeze({
  * @param {*} val
  * @param {*} exp 过期时长，单位分钟，180天 x 24小时 x 60分 = 259200分
  */
-function set$2(store, key, val, exp = 259200) {
+function set$2(store, key, val, exp = 525_600) {
   const v = {
     exp,
     time: Math.trunc(Date.now() / 1000), // 记录何时将值存入缓存，秒级
@@ -1251,10 +1253,10 @@ const lst = localStorage;
  * 离线存储，缺省 180 天
  * @param {*} key
  * @param {*} val
- * @param {*} exp 过期时长，单位分钟，180天 x 24小时 x 60分 = 259200分
+ * @param {*} exp 过期时长，单位分钟，365天 x 24小时 x 60分 = 525_600 分
  */
-function set$1(key, val, exp) {
-  set$2(lst, key, val);
+function set$1(key, val, exp = 525_600) {
+  set$2(lst, key, val, exp);
 }
 
 function get$3(key) {
@@ -1634,12 +1636,12 @@ function getExport(module) {
  */
 function add(ms) {
   for (const k of Object.keys(ms)) {
-    if (k !== 'R' && k !== 'M') {
+    if (k !== 'R' && k !== 'M') { // && !_m[k] 是否覆盖？
       const code = ms[k];
       // 函数
       const ps = code.match(/^function\s*\(\s*(\w+),?\s*(\w*)\s*,?\s*(\w*)\)\s*\{/);
       if (ps) {
-        const body = code.replace(ps[0], '').replace(/\};?\s*$/);
+        const body = code.replace(ps[0], '').replace(/\};?\s*$/, '');
         let fun;
         if (ps[3]) fun = new Function(ps[1], ps[2], ps[3], body);
         else if (ps[2]) fun = new Function(ps[1], ps[2], body);
@@ -1659,10 +1661,10 @@ function add(ms) {
 function get(cos, fs) {
   // 获得一个promise数组
   const ps = fs.map(f => {
-    // f = '/wia/wia.js?v=1.0.18';
+    // f = 'wia/wia.js?v=1.0.18';
     const pos = f.indexOf('?v=');
     const ver = f.slice(pos + 3);
-    const key = 'f.slice(0, pos)';
+    const key = f.slice(0, pos);
     console.log(`get module file:${key} ver:${ver}`);
 
     // 本地缓存

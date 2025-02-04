@@ -921,27 +921,29 @@ $.urlParam = url => {
   let R
   try {
     let str = url || window.location.href
-    if (!str) return
+    if (!str) return R
 
     let pos = str.indexOf('?')
-    if (pos !== -1) str = str.slice(pos + 1)
-    pos = str.indexOf('#')
-    if (pos !== -1) str = str.slice(0, pos)
-    const ps = str.split('&')
-    for (str of ps) {
-      if (!str) continue
-      pos = str.indexOf('=')
-      let name = str
-      let val = ''
-      if (pos !== -1) {
-        name = str.slice(0, pos)
-        val = str.slice(pos + 1)
-        if (val === 'undefined') val = undefined
-        else if (val === 'null') val = null
-        else val = decodeURIComponent(val)
+    if (pos !== -1) {
+      str = str.slice(pos + 1)
+      pos = str.indexOf('#')
+      if (pos !== -1) str = str.slice(0, pos)
+      const ps = str.split('&')
+      for (str of ps) {
+        if (!str) continue
+        pos = str.indexOf('=')
+        let name = str
+        let val = ''
+        if (pos !== -1) {
+          name = str.slice(0, pos)
+          val = str.slice(pos + 1)
+          if (val === 'undefined') val = undefined
+          else if (val === 'null') val = null
+          else val = decodeURIComponent(val)
+        }
+        if (!R) R = {}
+        R[decodeURIComponent(name)] = val
       }
-      if (!R) R = {}
-      R[decodeURIComponent(name)] = val
     }
   } catch (e) {
     console.error(`urlParam exp:${e.message}`)

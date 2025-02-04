@@ -164,12 +164,12 @@ function getExport(module) {
  */
 function add(ms) {
   for (const k of Object.keys(ms)) {
-    if (k !== 'R' && k !== 'M') {
+    if (k !== 'R' && k !== 'M') { // && !_m[k] 是否覆盖？
       const code = ms[k]
       // 函数
       const ps = code.match(/^function\s*\(\s*(\w+),?\s*(\w*)\s*,?\s*(\w*)\)\s*\{/)
       if (ps) {
-        const body = code.replace(ps[0], '').replace(/\};?\s*$/)
+        const body = code.replace(ps[0], '').replace(/\};?\s*$/, '')
         let fun
         if (ps[3]) fun = new Function(ps[1], ps[2], ps[3], body)
         else if (ps[2]) fun = new Function(ps[1], ps[2], body)
@@ -195,10 +195,10 @@ function clear() {}
 function get(cos, fs) {
   // 获得一个promise数组
   const ps = fs.map(f => {
-    // f = '/wia/wia.js?v=1.0.18';
+    // f = 'wia/wia.js?v=1.0.18';
     const pos = f.indexOf('?v=')
     const ver = f.slice(pos + 3)
-    const key = 'f.slice(0, pos)'
+    const key = f.slice(0, pos)
     console.log(`get module file:${key} ver:${ver}`)
 
     // 本地缓存

@@ -9,11 +9,10 @@ const lst = localStorage;
  * 离线存储，缺省 180 天
  * @param {*} key
  * @param {*} val
- * @param {*} exp 过期时长，单位分钟，180天 x 24小时 x 60分 = 259200分
+ * @param {*} exp 过期时长，单位分钟，365天 x 24小时 x 60分 = 525_600 分
  */
-function set(key, val, exp) {
-  exp = exp || 259200;
-  st.set(lst, key, val);
+function set(key, val, exp = 525_600) {
+  st.set(lst, key, val, exp);
 }
 
 function get(key) {

@@ -1,6 +1,6 @@
 {
   "name": "@wiajs/base",
-  "version": "1.2.3",
+  "version": "1.2.7",
   "description": "wia app base lib, included by index.html",
   "main": "./dist/base.cmn.js",
 	"module": "./dist/index.esm.js",

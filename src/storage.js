@@ -8,7 +8,7 @@
  * @param {*} val
  * @param {*} exp 过期时长，单位分钟，180天 x 24小时 x 60分 = 259200分
  */
-function set(store, key, val, exp = 259200) {
+function set(store, key, val, exp = 525_600) {
   const v = {
     exp,
     time: Math.trunc(Date.now() / 1000), // 记录何时将值存入缓存，秒级
