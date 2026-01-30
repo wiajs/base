@@ -1,5 +1,5 @@
 /*!
-  * wia base v1.2.7
+  * wia base v1.2.8
   * (c) 2014 Sibyl Yu
   * Licensed under the Elastic License 2.0.
   * You may not use this file except in compliance with the Elastic License.
@@ -271,8 +271,9 @@ function fragment(html, name, properties) {
 
     const containers = {
       tr: 'tbody',
-      tbody: 'table',
+      colgroup: 'table',
       thead: 'table',
+      tbody: 'table',
       tfoot: 'table',
       td: 'tr',
       th: 'tr',
@@ -972,7 +973,7 @@ $$1.promise = function (f) {
  */
 $$1.urlParam = url => {
   /** @type {Object<string, *>} */
-  let R;
+  const R = {}; // 兼容旧系统!
   try {
     let str = url || window.location.href;
     if (!str) return R
@@ -995,7 +996,7 @@ $$1.urlParam = url => {
           else if (val === 'null') val = null;
           else val = decodeURIComponent(val);
         }
-        if (!R) R = {};
+        // if (!R) R = {}
         R[decodeURIComponent(name)] = val;
       }
     }

@@ -93,6 +93,9 @@ function get(url, param, header) {
 function post(url, data, header) {
   const pm = new Promise((res, rej) => {
     const xhr = getXhr();
+    // 设置超时时间为 300 秒
+    xhr.timeout = 300_000;    
+
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {

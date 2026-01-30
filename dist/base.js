@@ -1,5 +1,5 @@
 /*!
-  * wia base v1.2.7
+  * wia base v1.2.8
   * (c) 2014 Sibyl Yu
   * Licensed under the Elastic License 2.0.
   * You may not use this file except in compliance with the Elastic License.
@@ -261,8 +261,9 @@
           if (name === undefined) name = fragmentRE.test(html) && RegExp.$1;
           var containers = {
               tr: 'tbody',
-              tbody: 'table',
+              colgroup: 'table',
               thead: 'table',
+              tbody: 'table',
               tfoot: 'table',
               td: 'tr',
               th: 'tr',
@@ -894,7 +895,8 @@
    * @param {string} [url] - 缺省 window.location.href
    * @returns {Object<string, *>}
    */ $$1.urlParam = function(url) {
-      /** @type {Object<string, *>} */ var R;
+      /** @type {Object<string, *>} */ var R = {} // 兼容旧系统!
+      ;
       try {
           var str = url || window.location.href;
           if (!str) return R;
@@ -917,7 +919,7 @@
                       else if (val === 'null') val = null;
                       else val = decodeURIComponent(val);
                   }
-                  if (!R) R = {};
+                  // if (!R) R = {}
                   R[decodeURIComponent(name)] = val;
               }
           }

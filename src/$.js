@@ -217,8 +217,9 @@ function fragment(html, name, properties) {
 
     const containers = {
       tr: 'tbody',
-      tbody: 'table',
+      colgroup: 'table',
       thead: 'table',
+      tbody: 'table',
       tfoot: 'table',
       td: 'tr',
       th: 'tr',
@@ -322,26 +323,31 @@ function getTag(value) {
 
 // 静态属性,可直接调用，识别 boolean、string、number、object、date、array、regexp、function
 $.type = function (obj) {
-  return obj == null ? String(obj) : class2type[toString.call(obj)] || 'object'
+	if ( obj == null ) return obj + "";	
+
+	return typeof obj === "object" ?
+		class2type[toString.call(obj)] || "object" :
+		typeof obj;  
 }
+
 // eslint-disable-next-line func-names
 $.isWindow = function (o) {
   return o != null && o == o.window
 }
+
 // 纯对象变量，不包含函数、Date、正则、数组等对象
 $.isObject = v => $.type(v) === 'object'
-$.isMap = v => $.type(v) === 'Map'
-$.isSet = v => $.type(v) === 'Set'
-$.isRegExp = v => $.type(v) === 'RegExp'
+$.isMap = v => $.type(v) === 'map'
+$.isSet = v => $.type(v) === 'set'
+$.isRegExp = v => $.type(v) === 'regExp'
 $.isSymbol = v => $.type(v) === 'symbol'
-$.isObj = $.isObject
-$.isPromise = val =>
-  ($.isObject(val) || $.isFunction(val)) && $.isFunction(val.then) && $.isFunction(val.catch)
+$.isPromise = v => $.type(v) === 'promise'
 
 // 值变量
 $.isValue = function (o) {
   return $.type(o) === 'string' || $.type(o) === 'number' || $.type(o) === 'boolean'
 }
+
 $.isVal = $.isValue
 
 // 函数变量
@@ -354,22 +360,53 @@ $.isFun = $.isFunction
 $.isDocument = function (o) {
   return o != null && o.nodeType == o.DOCUMENT_NODE
 }
+
 $.isDoc = $.isDocument
 
 $.isPlainObject = function (o) {
   return $.isObject(o) && !$.isWindow(o) && Object.getPrototypeOf(o) == Object.prototype
 }
 $.isPlain = $.isPlainObject
+$.isObj = $.isPlainObject
 
 $.isEmptyObject = function (o) {
-  var name
-  for (name in o) return false
-  return true
+  // 检查普通空对象
+  if (typeof p === 'object' && p !== null && p.constructor === Object && Object.keys(p).length === 0) return true
+  return false
 }
-$.isEmpty = function (o) {
-  if ($.isObject(o)) return $.isEmptyObject(o)
-  else if ($.isArray(o)) return o.length === 0
-  else return o === '' || o === null || o === undefined
+
+/**
+ * 判断参数是否为空
+ * @param {*} p
+ * @returns {boolean}
+ *  true: undefined/null/''/空对象/空数组/空Map/空Set
+ *  false: false/0/非空对象、非空数组、值
+ */
+$.isEmpty = function(p) {
+  if (p === undefined || p === null || p === '') return true
+  if (typeof p === 'string' && p.trim() === '') return true
+  if (Array.isArray(p) && p.length === 0) return true
+  if (p instanceof Map && p.size === 0) return true
+  if (p instanceof Set && p.size === 0) return true
+  // 检查普通空对象
+  if (typeof p === 'object' && p !== null && p.constructor === Object && Object.keys(p).length === 0) return true
+  
+  return false
+}
+
+/**
+ * 检查参数，不满足条件抛出异常
+ * 1. 非数组：null/undefined/''/空对象
+ * 2. 数组：其中一个元素 null/undefined/''/空对象
+ * @param {*} p 参数
+ * @param {string=} msg
+ */
+$.needParam = function(p, msg) {
+  if (isEmpty(p)) throw new Err(Err.MissParam, msg)
+
+  if (Array.isArray(p)) {
+    if (p.some(m => isEmpty(m))) throw new Err(Err.MissParam, msg)
+  }
 }
 
 /**
@@ -398,12 +435,22 @@ $.inArray = function (elem, array, i) {
 }
 
 // jQuery new Date() 判断为 数字
+/**
+ * 判断值是否为“数字”或“数字字符串”
+ * @param {*} val
+ * @returns {boolean}
+ */
 $.isNumeric = function (val) {
-  return typeof val === 'number' || ($.isObject(val) && getTag(val) == '[object Number]')
+  //return typeof val === 'number' || ($.isObject(val) && getTag(val) == '[object Number]')
+  if (value == null) return false;
+  if (typeof value === 'number') return Number.isFinite(value);
+  if (typeof value !== 'string') return false;
+  const v = value.trim();
+  return v !== '' && Number.isFinite(Number(v));
 }
 
 $.isNumber = $.isNumeric
-$.isNum = $.isNumeric
+$.isNum = $.isNumber
 $.isString = v => $.type(v) === 'string'
 $.isStr = $.isString
 $.isDom = v => D.isD(v)
@@ -415,6 +462,56 @@ $.isDateStr = function (v) {
 
 $.isNumStr = function (v) {
   return !Number.isNaN(Number(v))
+}
+
+/**
+ * 转换为数字，非数字 为 0，用于字段计算
+ * @param {*} val
+ * @returns {number}
+ */
+$.number = function(val) {
+  let R = 0
+  try {
+    if (val === '' || val === undefined || val === null || val === 'null') return 0
+
+    if (typeof val === 'string') val = val.replaceAll(',', '')
+
+    if ($.isNumber(val)) {
+      val = Number(val)
+      R = val
+    }
+  } catch (e) {
+    console.log(`number exp: ${e.message}`)
+  }
+
+  return R
+}
+
+/**
+ * 格式化数字：保留 cnt 位小数并添加千位分隔符
+ * @param {number} val - 需要格式化的数字
+ * @param {number} [cnt] - 小数位数
+ * @returns {string} 格式化后的字符串
+ */
+$.formatNum = function(val, cnt = 2, zero = true) {
+  let R
+  try {
+    if (typeof val === 'string') {
+      if (!$.isNumber(val)) return val // 如果不是数字，返回默认值
+
+      val = Number(val)
+    }
+
+    R = val.toLocaleString('en-US', {
+      minimumFractionDigits: cnt, // 最少保留 2 位小数
+      maximumFractionDigits: cnt, // 最多保留 2 位小数
+    })
+
+    if (!zero) R.replace(/\.0+$/, '').replace(/(\.\d+)0+$/, '$1')
+  } catch (e) {
+    console.log(`formatNum exp: ${e.message}`)
+  }
+  return R
 }
 
 $.funcArg = function (context, arg, idx, payload) {
@@ -526,7 +623,7 @@ $.grep = function (els, cb) {
 
 // Populate the class2type map
 $.each(
-  'Boolean Number String Function Array Date RegExp Object Error'.split(' '),
+  'Boolean Number String Function Array Date RegExp Object Error Map Set WeakMap ArrayBuffer DataView Int8Array Float32Array Promise AsyncFunction Generator Symbol BigInt'.split(' '),
   function (i, name) {
     class2type['[object ' + name + ']'] = name.toLowerCase()
   }
@@ -775,6 +872,16 @@ $.now = function () {
   return Date.now()
 }
 
+/**
+ * 延迟promise，可以 await 或 then
+ * @param {number} ms - 毫秒
+ */
+$.delay = function(ms) {
+  return new Promise(succ => {
+    setTimeout(succ, ms)
+  })
+}
+
 $.exp = function (info, e) {
   console.error(`${info} exp:${e.message}`)
 }
@@ -886,29 +993,50 @@ $.uniq = function (array) {
   })
 }
 
-// two params promisify
-$.promisify = function (f) {
+/**
+ * 简单异步函数转换为promise函数
+ * @param {*} f
+ * @param {*} type
+ * 0：一个回调，一个参数，无失败参数，仅仅返回执行结果
+ * 1: 一个回调函数，第一个参数为 err，第二个参数为成功结果
+ * 2：两个回调函数，第一个为成功回调，第二个为失败回调
+ * 3：两个回调函数，第一个为失败回调，第二个为成功回调
+ * @returns
+ */
+$.promisify = function(f, type = 1) {
   return (...arg) =>
     new Promise((res, rej) => {
-      f(...arg, (err, rs) => {
-        if (err) rej(err)
-        else res(rs)
-      })
+      if (type == null || type === 1)
+        f(...arg, (err, rs) => {
+          if (err) rej(err)
+          else res(rs)
+        })
+      else if (type === 0) f(...arg, rs => res(rs))
+      else if (type === 2)
+        f(
+          ...arg,
+          rs => res(rs),
+          rs => rej(rs || new Error('reject'))
+        )
+      else if (type === 3)
+        f(
+          ...arg,
+          rs => res(rs),
+          rs => rej(rs || new Error('reject'))
+        )
     })
 }
 
-// one param promisify
-$.promise = function (f) {
-  return (...arg) =>
-    new Promise((res, rej) => {
-      try {
-        f(...arg, rs => {
-          res(rs)
-        })
-      } catch (ex) {
-        rej(ex.message)
-      }
-    })
+$.confirm = async function(msg, title) {
+  return promisify($.app.dialog.confirm, 2)(msg, title)
+}
+
+$.alert = async function(msg, title) {
+  return promisify($.app.dialog.alert, 0)(msg, title)
+}
+
+$.prompt = async function(msg, title) {
+  return promisify($.app.dialog.prompt, 2)(msg, title)
 }
 
 /**
@@ -918,7 +1046,7 @@ $.promise = function (f) {
  */
 $.urlParam = url => {
   /** @type {Object<string, *>} */
-  let R
+  const R = {} // 兼容旧系统!
   try {
     let str = url || window.location.href
     if (!str) return R
@@ -941,7 +1069,7 @@ $.urlParam = url => {
           else if (val === 'null') val = null
           else val = decodeURIComponent(val)
         }
-        if (!R) R = {}
+        // if (!R) R = {}
         R[decodeURIComponent(name)] = val
       }
     }
