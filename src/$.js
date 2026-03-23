@@ -565,6 +565,8 @@ $.matches = function (el, sel) {
   return R
 }
 
+$.is = $.matches
+
 $.trim = function (str) {
   return str == null ? '' : String.prototype.trim.call(str)
 }
